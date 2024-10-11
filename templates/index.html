@@ -38,7 +38,7 @@
             width: 80%;
             /* height: 1000px; */
             /* background-color: aqua; */
-            margin-bottom: 100px;
+            margin-bottom: 160px;
         }
 
 
@@ -130,6 +130,20 @@
             font-family: Calibri;
         }
 
+        .input_top_menu {
+            margin: 0px;
+        }
+
+        .model_button {
+            font-size: 12px;
+            background-color: grey;
+            color: white;
+            padding: 10px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 9px;
+        }
+
 
     </style>
 </head>
@@ -142,18 +156,16 @@
     <div class="dialogue" id="dialogue">
         <div class="dialogue_item">
             <div class="dialogue_item_logo"><span class="dialogue_title">AGM</span></div>
-            <div class="dialogue_item_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum mollis leo sed porttitor. Donec in egestas mi, non imperdiet lacus. Duis egestas ante ante, et consequat tellus mollis at. Vestibulum at urna sapien. Aenean massa elit, molestie nec ante non, placerat rutrum lacus. Quisque at enim a nisl pulvinar convallis. Praesent eu lectus orci. Etiam aliquet lacus vel aliquet dignissim. Proin ut arcu sit amet risus faucibus pharetra. Praesent mollis nibh et nulla elementum maximus. In dapibus lobortis libero venenatis venenatis. Nulla facilisi. Quisque auctor facilisis ex vel euismod. Nulla in laoreet massa, et semper mi. Nunc et orci ullamcorper, placerat mi bibendum, pulvinar quam. Morbi maximus tincidunt dui ac rhoncus.</div>
-
+            <div class="dialogue_item_text">Ask anything!</div>
         </div>
-
-        <div class="dialogue_item">
-            <div class="dialogue_item_logo"><span class="dialogue_title">USER</span></div>
-            <div class="dialogue_item_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum mollis leo sed porttitor. Donec in egestas mi, non imperdiet lacus. Duis egestas ante ante, et consequat tellus mollis at. Vestibulum at urna sapien. Aenean massa elit, molestie nec ante non, placerat rutrum lacus. Quisque at enim a nisl pulvinar convallis. Praesent eu lectus orci. Etiam aliquet lacus vel aliquet dignissim. Proin ut arcu sit amet risus faucibus pharetra. Praesent mollis nibh et nulla elementum maximus. In dapibus lobortis libero venenatis venenatis. Nulla facilisi. Quisque auctor facilisis ex vel euismod. Nulla in laoreet massa, et semper mi. Nunc et orci ullamcorper, placerat mi bibendum, pulvinar quam. Morbi maximus tincidunt dui ac rhoncus.</div>
-
-        </div>
-    </div>
 
     <div class="footer">
+
+        <div class="input_top_menu">
+            <button class="model_button" id="3.5" onclick="ChooseModel(this.id)">GPT-3.5</button>
+            <button class="model_button" id="4.0" onclick="ChooseModel(this.id)">GPT-4.0</button>
+        </div>
+
         <div class="input_menu">
 
             <div class="input_wrapper">
@@ -169,6 +181,8 @@
             <button class="cleat_input" onclick="clearInput()"></button>
         </div>
 
+        <input type="file" id="imageInput" accept="image/*" onchange="uploadImage(this)"/>
+
     </div>
 
 
@@ -177,13 +191,39 @@
 
 
 <script>
+function uploadImage(inputElement) {
+    const file = inputElement.files[0];
+    const imageURL = URL.createObjectURL(file);
+    const img = document.createElement('img');
+    img.src = imageURL;
+    img.width = 200; // Ширина в пикселях
+    img.height = 150; // Высота в пикселях
+    img.alt = 'Описание изображения';
+    document.getElementById('dialogue').appendChild(img);
+};
+</script>
+
+<script>
+    var Model = "3.5"
+    document.getElementById("3.5").style.backgroundColor = '#6658ea'
+    function ChooseModel(clicked_id) {
+        Model = clicked_id;
+        const buttons = document.querySelectorAll('button.model_button');
+        buttons.forEach(button => {
+        button.style.backgroundColor = 'grey';
+        });
+        const button = document.getElementById(clicked_id);
+        button.style.backgroundColor = '#6658ea';
+    }
+</script>
+
+<script>
     const textarea = document.querySelector('textarea');
     textarea.addEventListener("keyup", e => {
         textarea.style.height = "50px";
         let scHeight = e.target.scrollHeight;
         textarea.style.height = `${scHeight}px`;  
     });
-
 </script>
 
 <script>
@@ -225,7 +265,10 @@
 
         dialogue.append(dialogue_item);
 
+        dialogue_item.scrollIntoView({ behavior: 'smooth' });
+
     };
+
     function Ask() {
         let question = document.getElementById('txta').value.trim();
         if (question.length == 0) {
@@ -234,7 +277,13 @@
         }
         CreateItem(question, 'user');
         clearInput()
-    };
+
+        fetch("{{ url_for('question') }}", {
+            method: "POST",
+            body: JSON.stringify({question: question}),
+            headers: {"Content-type": "application/json; charset=UTF-8"}
+        }).then(response => response.json()).then(data => CreateItem(data.answer, 'agm'))
+        };
 </script>
 
 
