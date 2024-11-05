@@ -144,6 +144,32 @@
             border-radius: 9px;
         }
 
+    .photo {
+        width: 80%;
+        height: auto;
+        display: block;
+        object-fit: contain;
+        margin-bottom: 12px;
+    }
+    
+    .dialogue_item_picture {
+
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .custom-file-upload {
+    display: inline-block;
+    width: 23px;
+    height: 30px;
+    margin-left: 10px;
+    /* border: none; */
+    background: url("{{ url_for('static', filename='icons/free-icon-image-gallery-3342137.png') }}") no-repeat center / contain;
+    /* cursor: pointer; */
+}
+
 
     </style>
 </head>
@@ -157,6 +183,9 @@
         <div class="dialogue_item">
             <div class="dialogue_item_logo"><span class="dialogue_title">AGM</span></div>
             <div class="dialogue_item_text">Ask anything!</div>
+            <!-- <div class="dialogue_item_picture"><img src="{{ url_for('static', filename='icons/test_1.png') }}" class="photo"></div> -->
+
+            
         </div>
 
     <div class="footer">
@@ -179,9 +208,13 @@
 
         <div class="input_menu_bottom">
             <button class="cleat_input" onclick="clearInput()"></button>
+            <input type="file" id="imageInput" accept="image/*" onchange="createPicture(this)" hidden/>
+            <label for="imageInput" class="custom-file-upload"></label>
         </div>
 
-        <input type="file" id="imageInput" accept="image/*" onchange="uploadImage(this)"/>
+        <!-- <input type="file" id="imageInput" accept="image/*" onchange="uploadImage(this)"/> -->
+
+        
 
     </div>
 
@@ -191,21 +224,67 @@
 
 
 <script>
+var picture
+
 function uploadImage(inputElement) {
     const file = inputElement.files[0];
     const imageURL = URL.createObjectURL(file);
+
+
+    const photo = new Image();
+    photo.src = imageURL;
+    photo.onload = function() {
+                    const width = photo.naturalWidth;
+                    const height = photo.naturalHeight;
+
+                    // console.log(`Ширина изображения: ${width}px`);
+                    // console.log(`Высота изображения: ${height}px`);
+                };
+
     const img = document.createElement('img');
+    img.classList.add('photo');
     img.src = imageURL;
-    img.width = 200; // Ширина в пикселях
-    img.height = 150; // Высота в пикселях
-    img.alt = 'Описание изображения';
-    document.getElementById('dialogue').appendChild(img);
+
+    console.log(img.naturalWidth, img.naturalHeight)
+
+    picture = imageURL;
+
+
+    let dialogue = document.getElementById("dialogue");
+
+
+    let dialogue_item = document.createElement('div');
+    dialogue_item.className = "dialogue_item";
+
+    let dialogue_item_logo = document.createElement('div');
+    dialogue_item_logo.className = "dialogue_item_logo";
+
+    let dialogue_item_logo_span = document.createElement('span');
+    dialogue_item_logo_span.className = "dialogue_title";
+    dialogue_item_logo_span.textContent = 'USER';
+
+    dialogue_item_logo.appendChild(dialogue_item_logo_span);
+    dialogue_item.appendChild(dialogue_item_logo);
+
+    dialogue_item_picture = document.createElement('div');
+    dialogue_item_picture.className = "dialogue_item_picture";
+
+    dialogue_item_picture.append(img)
+
+    dialogue_item.appendChild(dialogue_item_picture);
+    dialogue.append(dialogue_item);
+
+    dialogue_item.scrollIntoView({ behavior: 'smooth' });
+
+
+
 };
 </script>
 
 <script>
-    var Model = "3.5"
-    document.getElementById("3.5").style.backgroundColor = '#6658ea'
+    var Model = "3.5";
+    document.getElementById("3.5").style.backgroundColor = '#6658ea';
+
     function ChooseModel(clicked_id) {
         Model = clicked_id;
         const buttons = document.querySelectorAll('button.model_button');
@@ -235,14 +314,10 @@ function uploadImage(inputElement) {
 </script>
 
 <script>
-    function CreateItem(text, type) {
 
-        let dialogue = document.getElementById("dialogue")
+    let active_dialogue_item = null;
 
-
-        let dialogue_item = document.createElement('div');
-        dialogue_item.className = "dialogue_item";
-
+    function createLogo(type) {
         let dialogue_item_logo = document.createElement('div');
         dialogue_item_logo.className = "dialogue_item_logo";
 
@@ -253,19 +328,77 @@ function uploadImage(inputElement) {
         } else {
             dialogue_item_logo_span.textContent = 'AGM'
         };
-
         dialogue_item_logo.appendChild(dialogue_item_logo_span);
-        dialogue_item.appendChild(dialogue_item_logo);
+        return dialogue_item_logo
+    };
 
+    function createText(text) {
         let dialogue_item_text = document.createElement('div');
         dialogue_item_text.className = "dialogue_item_text";
         dialogue_item_text.innerText = text;
+        return dialogue_item_text
+    };
 
-        dialogue_item.appendChild(dialogue_item_text);
+    function createPicture(inputElement) {
+        const file = inputElement.files[0];
+        const imageURL = URL.createObjectURL(file);
+        const img = document.createElement('img');
+        img.classList.add('photo');
+        img.src = imageURL;
 
-        dialogue.append(dialogue_item);
+        if (active_dialogue_item === null) {
+            dialogue_item_picture = document.createElement('div');
+            dialogue_item_picture.className = "dialogue_item_picture";
+            dialogue_item_picture.append(img)
 
-        dialogue_item.scrollIntoView({ behavior: 'smooth' });
+
+            let dialogue = document.getElementById("dialogue");
+        
+            let dialogue_item = document.createElement('div');
+            dialogue_item.className = "dialogue_item";
+
+            let dialogue_item_logo = createLogo(type='user');
+            dialogue_item.appendChild(dialogue_item_logo);
+
+            dialogue_item.appendChild(dialogue_item_picture);
+            dialogue.append(dialogue_item);
+
+            active_dialogue_item = dialogue_item;
+            active_dialogue_item.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        else {
+            cur_img = active_dialogue_item.getElementsByTagName('img')[0];
+            cur_img.src = imageURL;
+            active_dialogue_item.scrollIntoView({ behavior: 'smooth' });
+        };
+    };
+
+    function CreateItem(text, type, active_dialogue_item) {
+
+        if (active_dialogue_item === null) {
+
+            let dialogue = document.getElementById("dialogue");
+
+            let dialogue_item = document.createElement('div');
+            dialogue_item.className = "dialogue_item";
+
+            let dialogue_item_logo = createLogo(type);
+            dialogue_item.appendChild(dialogue_item_logo);
+
+            let dialogue_item_text = createText(text);
+            dialogue_item.appendChild(dialogue_item_text);
+            dialogue.append(dialogue_item);
+            dialogue_item.scrollIntoView({ behavior: 'smooth' });
+
+        }
+        else {
+            let dialogue_item_text = createText(text);
+            active_dialogue_item.append(dialogue_item_text);
+            active_dialogue_item.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        
 
     };
 
@@ -275,14 +408,15 @@ function uploadImage(inputElement) {
             clearInput()
             return
         }
-        CreateItem(question, 'user');
+        CreateItem(question, 'user', active_dialogue_item);
+        active_dialogue_item = null;
         clearInput()
 
         fetch("{{ url_for('question') }}", {
             method: "POST",
             body: JSON.stringify({question: question}),
-            headers: {"Content-type": "application/json; charset=UTF-8"}
-        }).then(response => response.json()).then(data => CreateItem(data.answer, 'agm'))
+            headers: {"Content-type": "application/json; charset=UTF-8"} 
+        }).then(response => response.json()).then(data => CreateItem(data.answer, 'agm', null))
         };
 </script>
 
