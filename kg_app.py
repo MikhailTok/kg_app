@@ -2,10 +2,12 @@ from flask import Flask
 from flask import render_template
 from flask import url_for
 from flask import request
-
+import base64
 import os
 
 app = Flask(__name__)
+
+import time
 
 
 import os
@@ -41,39 +43,36 @@ def index():
 #     temperature=0,
 #     )
 
+def encode_image(image):
+    return base64.b64encode(image).decode('utf-8')
 
 
 @app.route('/question', methods=['POST'])
 def question():
-
     question = request.form.get('text')
-
-    # Получаем файл изображения
     image = request.files.get('image')
 
+    content = [{"type": "text", "text": question}]
+
     if image:
-        # Сохраняем изображение на диск или обрабатываем его
-        image.save(f'uploads/{image.filename}')
+        base64_image = encode_image(image.read())
+        image = [{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}", "detail": "low"}}]
+        content += image
 
-
-    MODEL = "gpt-3.5-turbo"
-    # question = request.json['question']
-
+    MODEL = 'gpt-4o-mini-2024-07-18' or "gpt-3.5-turbo"
     chat_completion = client.chat.completions.create(
         model=MODEL,
-        messages=[{"role": "user", "content": question}],
+        messages=[{"role": "user", "content": content}],
         temperature=0,
         )
-    
     answer = chat_completion.choices[0].message.content
 
+    # time.sleep(1)
     # answer = 'Ответ бота'
     return {'answer': answer}
 
  
 
 if __name__ == '__main__':
-    if not os.path.exists('uploads'):
-        os.makedirs('uploads')  
     port = 5000
     app.run(host='0.0.0.0', port=port, debug=True)

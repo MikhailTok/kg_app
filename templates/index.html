@@ -168,7 +168,13 @@
     /* border: none; */
     background: url("{{ url_for('static', filename='icons/free-icon-image-gallery-3342137.png') }}") no-repeat center / contain;
     /* cursor: pointer; */
-}
+    }
+
+    .dialogue_item_picture_size {
+        text-align: right;
+        font-size: 12px;
+        font-family: Calibri;
+    }
 
 
     </style>
@@ -183,8 +189,8 @@
         <div class="dialogue_item">
             <div class="dialogue_item_logo"><span class="dialogue_title">AGM</span></div>
             <div class="dialogue_item_text">Ask anything!</div>
-            <!-- <div class="dialogue_item_picture"><img src="{{ url_for('static', filename='icons/test_1.png') }}" class="photo"></div>
-            <div class="dialogue_item_picture_size">320x420</div> -->
+            <div class="dialogue_item_picture"><img src="{{ url_for('static', filename='icons/test_1.png') }}" class="photo"></div>
+            <div class="dialogue_item_picture_size">320x420</div>
 
             
         </div>
