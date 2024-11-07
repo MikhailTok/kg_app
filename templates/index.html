@@ -183,7 +183,8 @@
         <div class="dialogue_item">
             <div class="dialogue_item_logo"><span class="dialogue_title">AGM</span></div>
             <div class="dialogue_item_text">Ask anything!</div>
-            <!-- <div class="dialogue_item_picture"><img src="{{ url_for('static', filename='icons/test_1.png') }}" class="photo"></div> -->
+            <!-- <div class="dialogue_item_picture"><img src="{{ url_for('static', filename='icons/test_1.png') }}" class="photo"></div>
+            <div class="dialogue_item_picture_size">320x420</div> -->
 
             
         </div>
@@ -221,65 +222,6 @@
 
 
 </div>
-
-
-<script>
-var picture
-
-function uploadImage(inputElement) {
-    const file = inputElement.files[0];
-    const imageURL = URL.createObjectURL(file);
-
-
-    const photo = new Image();
-    photo.src = imageURL;
-    photo.onload = function() {
-                    const width = photo.naturalWidth;
-                    const height = photo.naturalHeight;
-
-                    // console.log(`Ширина изображения: ${width}px`);
-                    // console.log(`Высота изображения: ${height}px`);
-                };
-
-    const img = document.createElement('img');
-    img.classList.add('photo');
-    img.src = imageURL;
-
-    console.log(img.naturalWidth, img.naturalHeight)
-
-    picture = imageURL;
-
-
-    let dialogue = document.getElementById("dialogue");
-
-
-    let dialogue_item = document.createElement('div');
-    dialogue_item.className = "dialogue_item";
-
-    let dialogue_item_logo = document.createElement('div');
-    dialogue_item_logo.className = "dialogue_item_logo";
-
-    let dialogue_item_logo_span = document.createElement('span');
-    dialogue_item_logo_span.className = "dialogue_title";
-    dialogue_item_logo_span.textContent = 'USER';
-
-    dialogue_item_logo.appendChild(dialogue_item_logo_span);
-    dialogue_item.appendChild(dialogue_item_logo);
-
-    dialogue_item_picture = document.createElement('div');
-    dialogue_item_picture.className = "dialogue_item_picture";
-
-    dialogue_item_picture.append(img)
-
-    dialogue_item.appendChild(dialogue_item_picture);
-    dialogue.append(dialogue_item);
-
-    dialogue_item.scrollIntoView({ behavior: 'smooth' });
-
-
-
-};
-</script>
 
 <script>
     var Model = "3.5";
@@ -361,7 +303,17 @@ function uploadImage(inputElement) {
             dialogue_item.appendChild(dialogue_item_logo);
 
             dialogue_item.appendChild(dialogue_item_picture);
+
+            let dialogue_item_picture_size = document.createElement('div');
+            dialogue_item_picture_size.className = "dialogue_item_picture_size";
+            dialogue_item.appendChild(dialogue_item_picture_size);
             dialogue.append(dialogue_item);
+
+            img.onload = function() {
+                    const width = img.naturalWidth;
+                    const height = img.naturalHeight;
+                    dialogue_item_picture_size.innerHTML = width + 'x' + height;
+                };
 
             active_dialogue_item = dialogue_item;
             active_dialogue_item.scrollIntoView({ behavior: 'smooth' });
@@ -388,6 +340,7 @@ function uploadImage(inputElement) {
 
             let dialogue_item_text = createText(text);
             dialogue_item.appendChild(dialogue_item_text);
+
             dialogue.append(dialogue_item);
             dialogue_item.scrollIntoView({ behavior: 'smooth' });
 
@@ -402,20 +355,33 @@ function uploadImage(inputElement) {
 
     };
 
-    function Ask() {
+    async function Ask() {
         let question = document.getElementById('txta').value.trim();
         if (question.length == 0) {
             clearInput()
             return
         }
         CreateItem(question, 'user', active_dialogue_item);
+
+        const formData = new FormData();
+        formData.append('text', question);
+
+        if (active_dialogue_item) {
+            var images = active_dialogue_item.getElementsByTagName('img')[0];
+            const imgSrc = images.getAttribute('src');
+            const response = await fetch(imgSrc);
+            const blob = await response.blob();
+            formData.append('image', blob, 'image.jpg'); // Замените 'image.jpg' на нужное имя файла
+        };
+
         active_dialogue_item = null;
         clearInput()
 
         fetch("{{ url_for('question') }}", {
             method: "POST",
-            body: JSON.stringify({question: question}),
-            headers: {"Content-type": "application/json; charset=UTF-8"} 
+            body: formData
+            // body: JSON.stringify({question: question}),
+            // headers: {"Content-type": "application/json; charset=UTF-8"} 
         }).then(response => response.json()).then(data => CreateItem(data.answer, 'agm', null))
         };
 </script>

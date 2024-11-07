@@ -3,6 +3,8 @@ from flask import render_template
 from flask import url_for
 from flask import request
 
+import os
+
 app = Flask(__name__)
 
 
@@ -43,8 +45,19 @@ def index():
 
 @app.route('/question', methods=['POST'])
 def question():
+
+    question = request.form.get('text')
+
+    # Получаем файл изображения
+    image = request.files.get('image')
+
+    if image:
+        # Сохраняем изображение на диск или обрабатываем его
+        image.save(f'uploads/{image.filename}')
+
+
     MODEL = "gpt-3.5-turbo"
-    question = request.json['question']
+    # question = request.json['question']
 
     chat_completion = client.chat.completions.create(
         model=MODEL,
@@ -60,5 +73,7 @@ def question():
  
 
 if __name__ == '__main__':
+    if not os.path.exists('uploads'):
+        os.makedirs('uploads')  
     port = 5000
     app.run(host='0.0.0.0', port=port, debug=True)
