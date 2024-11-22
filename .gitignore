@@ -17,3 +17,5 @@ uploads/*
 
 
 models.py
+
+history.db

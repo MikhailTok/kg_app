@@ -28,7 +28,7 @@
 
             width: 80%;
             height: 50px;
-            background-color: white;
+            background-color: rgb(103, 52, 125);
             position: fixed;
             top: 0;
         }
@@ -176,6 +176,42 @@
         font-family: Calibri;
     }
 
+    /* .head_menu_history {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+    } */
+
+    .dropdown-content {
+        /* display: none; */
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        overflow: auto;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        margin-top:50px;
+    }
+
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+    /* .show {display: block;} */
+
+    #myDropdown {
+    position: absolute;
+    left: -300px; /* Измените ширину в соответствии с вашими нуждами */
+    transition: left 0.5s ease-in-out;
+}
+
+    #myDropdown.show {
+        left: 0;
+    }
+
 
     </style>
 </head>
@@ -183,7 +219,20 @@
 
 <div class="main">
 
-    <div class="head"></div>
+    <div class="head">
+        <div class="head_menu">
+            <button class="head_menu_history" onclick="myFunction()">History</button>
+            <div id="myDropdown" class="dropdown-content">
+                {% block hist %}
+                    {% if history is not none %}
+                        {% for item in history %}
+                            <a href="{{ url_for('index', dialogue_id=item[0]) }}">{{ item[0] }}</a>
+                        {% endfor %}
+                    {% endif %}
+                {% endblock %}
+              </div>
+        </div>
+    </div>
 
     <div class="dialogue" id="dialogue">
         <div class="dialogue_item">
@@ -191,6 +240,27 @@
             <div class="dialogue_item_text">Ask anything!</div>
             <div class="dialogue_item_picture"><img src="{{ url_for('static', filename='icons/test_1.png') }}" class="photo"></div>
             <div class="dialogue_item_picture_size">320x420</div>
+
+
+            {% block content %}
+                {% if dialogue is not none %} 
+                    {% for item in dialogue %}
+
+                    <div class="dialogue_item">
+                        <div class="dialogue_item_logo"><span class="dialogue_title">USER</span></div>
+                        <div class="dialogue_item_text">{{ item[5] }}</div>
+
+                        {% if item[6] is not none %} 
+                        <!-- <div class="dialogue_item_picture"><img src="{{ url_for('uploaded_file', filename='user_id_2_dialogue_id_6_question_id_5.png') }}" class="photo"></div> -->
+                         <div class="dialogue_item_picture"><img src="{{ item[6] }} " class="photo"></div>
+                         {% endif %}
+                        <div class="dialogue_item_logo"><span class="dialogue_title">AMG</span></div>
+                        <div class="dialogue_item_text">{{ item[7] }}</div>
+                    </div>
+                    
+                    {% endfor %}
+                {% endif %}
+          {% endblock %}
 
             
         </div>
@@ -200,6 +270,8 @@
         <div class="input_top_menu">
             <button class="model_button" id="3.5" onclick="ChooseModel(this.id)">GPT-3.5</button>
             <button class="model_button" id="4.0" onclick="ChooseModel(this.id)">GPT-4.0</button>
+
+            <button class="new_dialogue" id="new_dialogue" onclick="NewDialogueFun(this.id)">New Dialogue</button>
         </div>
 
         <div class="input_menu">
@@ -230,6 +302,45 @@
 </div>
 
 <script>
+
+function myFunction() {
+
+    const slideDiv = document.getElementById('myDropdown');
+    slideDiv.classList.add('show');
+};
+
+window.onclick = function(event) {
+    if (!event.target.matches('.head_menu_history')) {
+        const slideDiv = document.getElementById('myDropdown');
+        slideDiv.classList.remove('show');}
+    };
+
+</script>
+
+// <!-- <script>
+    /* When the user clicks on the button, 
+    toggle between hiding and showing the dropdown content */
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+    
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function(event) {
+      if (!event.target.matches('.head_menu_history')) {
+    
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+// </script> -->
+
+<script>
     var Model = "3.5";
     document.getElementById("3.5").style.backgroundColor = '#6658ea';
 
@@ -242,6 +353,20 @@
         const button = document.getElementById(clicked_id);
         button.style.backgroundColor = '#6658ea';
     }
+
+    var NewDialogue = 0
+
+    function NewDialogueFun(clicked_id) {
+        const button = document.querySelectorAll('button.new_dialogue')[0];
+        if (NewDialogue == 0) {
+            NewDialogue = 1
+            button.style.backgroundColor = '#6658ea';
+        } else {
+            NewDialogue = 0
+            button.style.backgroundColor = 'grey';
+        }
+
+    };
 </script>
 
 <script>
@@ -369,8 +494,16 @@
         }
         CreateItem(question, 'user', active_dialogue_item);
 
+        
+
         const formData = new FormData();
         formData.append('text', question);
+        formData.append('model', Model);
+        formData.append('new_dialogue', NewDialogue);
+
+        NewDialogue = 0
+        const button = document.querySelectorAll('button.new_dialogue')[0];
+        button.style.backgroundColor = 'grey';
 
         if (active_dialogue_item) {
             var images = active_dialogue_item.getElementsByTagName('img')[0];
