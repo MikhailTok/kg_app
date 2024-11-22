@@ -169,17 +169,17 @@ def question():
     content += current_content
 
     
-    MODEL = 'gpt-4o-mini-2024-07-18' if model == '4.0' else "gpt-3.5-turbo"
-    chat_completion = client.chat.completions.create(
-        model=MODEL,
-        messages=content,
-        temperature=0,
-        )
-    answer = chat_completion.choices[0].message.content
+    # MODEL = 'gpt-4o-mini-2024-07-18' if model == '4.0' else "gpt-3.5-turbo"
+    # chat_completion = client.chat.completions.create(
+    #     model=MODEL,
+    #     messages=content,
+    #     temperature=0,
+    #     )
+    # answer = chat_completion.choices[0].message.content
 
 
-    # time.sleep(1)
-    # answer = 'Ответ бота'
+    time.sleep(1)
+    answer = 'Ответ бота'
 
 
 

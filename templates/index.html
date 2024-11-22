@@ -144,6 +144,16 @@
             border-radius: 9px;
         }
 
+        .btns {
+            font-size: 12px;
+            background-color: grey;
+            color: white;
+            padding: 10px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 9px;
+        }
+
     .photo {
         width: 80%;
         height: auto;
@@ -221,7 +231,7 @@
 
     <div class="head">
         <div class="head_menu">
-            <button class="head_menu_history" onclick="myFunction()">History</button>
+            <button class="head_menu_history btns" onclick="myFunction()">History</button>
             <div id="myDropdown" class="dropdown-content">
                 {% block hist %}
                     {% if history is not none %}
@@ -251,8 +261,7 @@
                         <div class="dialogue_item_text">{{ item[5] }}</div>
 
                         {% if item[6] is not none %} 
-                        <!-- <div class="dialogue_item_picture"><img src="{{ url_for('uploaded_file', filename='user_id_2_dialogue_id_6_question_id_5.png') }}" class="photo"></div> -->
-                         <div class="dialogue_item_picture"><img src="{{ item[6] }} " class="photo"></div>
+                            <div class="dialogue_item_picture"><img src="{{ item[6] }} " class="photo"></div>
                          {% endif %}
                         <div class="dialogue_item_logo"><span class="dialogue_title">AMG</span></div>
                         <div class="dialogue_item_text">{{ item[7] }}</div>
@@ -260,7 +269,7 @@
                     
                     {% endfor %}
                 {% endif %}
-          {% endblock %}
+            {% endblock %}
 
             
         </div>
@@ -271,7 +280,7 @@
             <button class="model_button" id="3.5" onclick="ChooseModel(this.id)">GPT-3.5</button>
             <button class="model_button" id="4.0" onclick="ChooseModel(this.id)">GPT-4.0</button>
 
-            <button class="new_dialogue" id="new_dialogue" onclick="NewDialogueFun(this.id)">New Dialogue</button>
+            <button class="new_dialogue btns" id="new_dialogue" onclick="NewDialogueFun(this.id)">NEW DIALOGUE</button>
         </div>
 
         <div class="input_menu">
