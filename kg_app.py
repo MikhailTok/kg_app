@@ -63,7 +63,7 @@ def index(dialogue_id=None):
                                         where user_id = {user_id} and dialogue_id = {dialogue_id} order by question_id ASC""")
             
         
-        print(history)
+        # print(history)
 
     return render_template("index.html", dialogue=content, history=history)
 
